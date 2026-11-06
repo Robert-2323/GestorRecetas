@@ -85,7 +85,7 @@ public class Main {
     }
 
     public static void crearFicheroRecetas(){
-        try (DataOutputStream dOut=new DataOutputStream(new FileOutputStream(RUTA_DIR+RUTA_RECETAS))){
+        try (ObjectOutputStream dOut=new ObjectOutputStream(new FileOutputStream(RUTA_DIR+RUTA_RECETAS))){
             File catalogoInicial=new File(RUTA_DIR+RUTA_RECETAS);
             if (catalogoInicial.createNewFile()){
                 System.out.println("Archivo creado correctamente");
@@ -96,20 +96,7 @@ public class Main {
             Receta[] recetas=recetasDefault();
 
             for (int i=0;i<recetas.length;i++){
-                int idReceta=recetas[i].getNumReceta();
-                String nombre=recetas[i].getNombre();
-                String[] ingredientes=recetas[i].getIngredientes();
-                String preparacion=recetas[i].getPreparacion();
-                double tiempo=recetas[i].getTiempoPreparacion();
-
-                dOut.writeInt(idReceta);
-                dOut.writeUTF(nombre);
-                dOut.writeInt(ingredientes.length);
-                for (int j=0;j<ingredientes.length;j++){
-                    dOut.writeUTF(ingredientes[j]);
-                }
-                dOut.writeUTF(preparacion);
-                dOut.writeDouble(tiempo);
+                dOut.writeObject(recetas[i]);
             }
             System.out.println("Archivo generado correctamente");
 
@@ -118,17 +105,19 @@ public class Main {
         }
     }
     public static void leerRecetas(){
-        try(DataInputStream dIn=new DataInputStream(new FileInputStream(RUTA_DIR+RUTA_RECETAS))){
+        try(ObjectInputStream dIn=new ObjectInputStream(new FileInputStream(RUTA_DIR+RUTA_RECETAS))){
             while (true){
-                int idReceta=dIn.readInt();
-                String nombre=dIn.readUTF();
-                int ingredientesLength=dIn.readInt();
+               Receta receta=(Receta) dIn.readObject();
+
+                int idReceta=receta.getNumReceta();
+                String nombre=receta.getNombre();
+                int ingredientesLength=receta.getIngredientes().length;
                 ArrayList<String> ingredientes=new ArrayList<>();
                 for (int i=0;i<ingredientesLength;i++){
-                    ingredientes.add(dIn.readUTF());
+                    ingredientes.add(receta.getIngredientes()[i]);
                 }
-                String preparacion=dIn.readUTF();
-                double tiempo=dIn.readDouble();
+                String preparacion=receta.getPreparacion();
+                double tiempo=receta.getTiempoPreparacion();
 
                 System.out.println("----"+idReceta+"-"+nombre+"----");
                 System.out.println("Ingredientes: ");
@@ -145,22 +134,26 @@ public class Main {
             System.out.println("--- Fin del archivo ---");
         }catch (IOException e){
             System.out.println("Error al leer el archivo Recetas");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
 
     public static void leerRecetas(int id){
-        try(DataInputStream dIn=new DataInputStream(new FileInputStream(RUTA_DIR+RUTA_RECETAS))){
+        try(ObjectInputStream dIn=new ObjectInputStream(new FileInputStream(RUTA_DIR+RUTA_RECETAS))){
             while (true){
-                int idReceta=dIn.readInt();
-                String nombre = dIn.readUTF();
-                int ingredientesLength = dIn.readInt();
-                ArrayList<String> ingredientes = new ArrayList<>();
-                for (int i = 0; i < ingredientesLength; i++) {
-                    ingredientes.add(dIn.readUTF());
+                Receta receta=(Receta) dIn.readObject();
+
+                int idReceta=receta.getNumReceta();
+                String nombre=receta.getNombre();
+                int ingredientesLength=receta.getIngredientes().length;
+                ArrayList<String> ingredientes=new ArrayList<>();
+                for (int i=0;i<ingredientesLength;i++){
+                    ingredientes.add(receta.getIngredientes()[i]);
                 }
-                String preparacion = dIn.readUTF();
-                double tiempo = dIn.readDouble();
-                if(id==idReceta) {
+                String preparacion=receta.getPreparacion();
+                double tiempo=receta.getTiempoPreparacion();
+                if (id==idReceta) {
                     System.out.println("----" + idReceta + "-" + nombre + "----");
                     System.out.println("Ingredientes: ");
                     for (int i = 0; i < ingredientes.size(); i++) {
@@ -177,6 +170,8 @@ public class Main {
             System.out.println("--- Fin del archivo ---");
         }catch (IOException e){
             System.out.println("Error al leer el archivo Recetas");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -198,7 +193,9 @@ public class Main {
                     double nuevoTiempo=sc.nextDouble();
 
                    try(RandomAccessFile random=new RandomAccessFile(RUTA_DIR+RUTA_RECETAS,"rw")){
+
                     int bytesReceta=contarBytesReceta(idReceta,nombre,ingredientes,preparacion,tiempo);
+
                     random.seek(bytesReceta-8);
                     System.out.println(bytesReceta);
                     //random.writeDouble(nuevoTiempo);
