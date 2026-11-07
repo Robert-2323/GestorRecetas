@@ -1,12 +1,15 @@
-public class Receta {
+import java.io.Serializable;
+import java.util.ArrayList;
+
+public class Receta implements Serializable {
     private int numReceta=count;
     private String nombre;
-    private String[] ingredientes;
+    private ArrayList<String> ingredientes;
     private String preparacion;
     private double tiempoPreparacion;
     static int count=1;
 
-    public Receta(String nombre,String[] ingredientes,String preparacion,double tiempoPreparacion){
+    public Receta(String nombre,ArrayList<String> ingredientes,String preparacion,double tiempoPreparacion){
         count++;
         this.nombre=nombre;
         this.ingredientes=ingredientes;
@@ -18,7 +21,7 @@ public class Receta {
         return tiempoPreparacion;
     }
 
-    public void setTiempoPreparacion(int tiempoPreparacion) {
+    public void setTiempoPreparacion(double tiempoPreparacion) {
         this.tiempoPreparacion = tiempoPreparacion;
     }
 
@@ -30,11 +33,11 @@ public class Receta {
         this.preparacion = preparacion;
     }
 
-    public String[] getIngredientes() {
+    public ArrayList<String>getIngredientes() {
         return ingredientes;
     }
 
-    public void setIngredientes(String[] ingredientes) {
+    public void setIngredientes(ArrayList<String> ingredientes) {
         this.ingredientes = ingredientes;
     }
 
